@@ -5,14 +5,15 @@ A happy box that opens up and says hello when you walk in front of it !
 Components:
 - Arduino or similar
 - Breadboard
-- Movement sensor 
+- Movement sensor (triggers when something stands or walk in front of it)
 - Electrical motor
 - On/Off Switch 
 - Battery
 - USB Charger & Port
-- Audio Input/output
 - ...
 
+Optional:
+- Audio Input/output
 
 Next level: 
 - Internet/Bluetooth Connection 
