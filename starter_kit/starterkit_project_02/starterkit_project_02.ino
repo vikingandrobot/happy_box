@@ -10,7 +10,7 @@ void setup() {
 void loop() {
   switchState = digitalRead(2);
 
-  if (switchState == HIGH) {
+  if (switchState == LOW) {
     digitalWrite(3, HIGH); // green
     digitalWrite(4, LOW); // red
     digitalWrite(5, LOW); // red
