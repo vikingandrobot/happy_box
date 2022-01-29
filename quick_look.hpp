@@ -4,7 +4,7 @@
 #ifndef quick_look_h
 #define quick_look_h
 
-class QuickLook : Mood {
+class QuickLook : public Mood {
   public:
     QuickLook(
       Servo* servo
