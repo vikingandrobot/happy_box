@@ -1,58 +1,97 @@
 #include "globals.hpp"
 #include "mood.hpp"
+#include "sleeping.hpp"
 #include "quick_look.hpp"
 #include "angry.hpp"
+#include "curious_but_shy.hpp"
 
-Servo servo;
+VL53L0X distanceSensor;
 
-QuickLook quickLook(&servo);
-Angry angry(&servo);
+#define QUICK_LOOK 0
+#define ANGRY 1
+#define CURIOUS_BUT_SHY 2
+
+// Different available moods
+Sleeping sleeping(&distanceSensor);
+QuickLook quickLook(&distanceSensor);
+Angry angry(&distanceSensor);
+CuriousButShy curiousButShy(&distanceSensor);
 Mood* currentMood;
 
-short TOTAL_MOODS = 2;
-short currentMoodIndex = 1;
+short currentMoodIndex = -1;
 
-short increment(short moodIndex) {
-  if (moodIndex >= TOTAL_MOODS - 1) {
-    return 0;
+bool isMoodFinished = false;
+
+/**
+ * return the mood that has triggered, -1 if there are no mood available.
+ */
+short waitForMoodToTrigger() {
+  int distance = distanceSensor.readRangeSingleMillimeters();
+
+  if (distance < THING_PERSONAL_SPACE_DISTANCE / 2) {
+    return ANGRY;
+  } else if (distance > THING_PERSONAL_SPACE_DISTANCE && distance < THING_SIGHT_DISTANCE) {
+    return QUICK_LOOK;
+  } else if (distance > THING_PERSONAL_SPACE_DISTANCE) {
+    return CURIOUS_BUT_SHY;
   }
-  return moodIndex + 1;
+
+  return -1;
 }
 
 Mood* getCurrentMood(short moodIndex) {
   switch(moodIndex){
+
+    case 2:
+      return &curiousButShy;
+    
     case 1:
       return &angry;
     
     case 0:
-    default:
       return &quickLook;
+
+    // -1 
+    default:
+      return &sleeping;
   }
 }
 
 
 
 void setup() {
-  // Servo will be controlled using pin 3 
-  servo.attach(3);
-  servo.write(SERVO_MAX_ANGLE);
-
   Serial.begin(9600);
 
   // The pin to use to let electricity flow to the motor
   pinMode(MOTOR_OUTPUT_PIN, OUTPUT);
+
+  // Set up the distance sensor
+  Wire.begin();
+  if (!distanceSensor.init())
+  {
+    Serial.println("Failed to detect and initialize sensor!");
+    while (1) {
+      delay(10);
+    }
+  }
 }
 
 void loop() {
-
-  currentMood = getCurrentMood(currentMoodIndex);
-
-  // put your main code here, to run repeatedly:
-  bool result = currentMood->interact();
-
-  if (result) {
-    currentMoodIndex = increment(currentMoodIndex);
+  if (isMoodFinished) {
+    delay(2000);
+    currentMoodIndex = waitForMoodToTrigger();
+    Serial.println("Chosen mood index");
+    Serial.println(currentMoodIndex);
+    if (currentMoodIndex < 0) {
+      // If we didn't find a mood, we do nothing.
+      delay(10);
+      return;
+    }
+    isMoodFinished = false;
+    return;
   }
 
-  delay(2000);
+
+  currentMood = getCurrentMood(currentMoodIndex);
+  isMoodFinished = currentMood->interact();
 }

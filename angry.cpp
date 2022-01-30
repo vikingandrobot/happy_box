@@ -2,18 +2,28 @@
 #include "angry.hpp"
 #include "globals.hpp"
 
+
 bool Angry::interact() {
-  delay(100);
+  if (this->angryScale == 0) {    
+    digitalWrite(MOTOR_OUTPUT_PIN, HIGH);
+    delay(1500);
+    digitalWrite(MOTOR_OUTPUT_PIN, LOW);
+  }
 
-  digitalWrite(MOTOR_OUTPUT_PIN, HIGH);
+  for (short i = 0; i < this->angryScale; ++i) {
+    digitalWrite(MOTOR_OUTPUT_PIN, HIGH);
+    delay(500);
+    digitalWrite(MOTOR_OUTPUT_PIN, LOW);
+    delay(800);
+  }
+  delay(1000);
+  int distance = this->distanceSensor->readRangeSingleMillimeters();
+  
+  if (distance < this->ANGRY_DISTANCE_LIMIT) {
+    this->angryScale += 1;
+    return false;
+  }
 
-  delay (2000);
-
-  Serial.println(MOTOR_OUTPUT_PIN);
-
-  digitalWrite(MOTOR_OUTPUT_PIN, LOW);
-
-  delay(100);
-
+  this->angryScale = 0;
   return true;
 }

@@ -2,16 +2,26 @@
 #include "globals.hpp"
 
 bool QuickLook::interact() {
-  for (short angle = SERVO_MAX_ANGLE; angle >= SERVO_MIN_ANGLE; --angle) {
-    this->servo->write(angle);
-    delay(10);
+  delay(50);
+  ++this->numberOfCycles;
+  if (this->numberOfCycles < 150) {
+    int distance = this->distanceSensor->readRangeSingleMillimeters();
+    if (this->numberOfCycles == 1 && distance >= THING_PERSONAL_SPACE_DISTANCE) {
+      digitalWrite(MOTOR_OUTPUT_PIN, HIGH);
+      return false;
+    } 
+
+    if (distance < THING_PERSONAL_SPACE_DISTANCE) {
+      digitalWrite(MOTOR_OUTPUT_PIN, LOW);
+      this->numberOfCycles = 0;
+      return true;
+    }
+  } else {
+    // The thing has been looking for long enough
+    digitalWrite(MOTOR_OUTPUT_PIN, LOW);
+    this->numberOfCycles = 0;
+    return true;
   }
 
-  delay(2000);
-
-  this->servo->write(SERVO_MAX_ANGLE);
-
-  delay(1000);
-
-  return true;
+  return false;
 }

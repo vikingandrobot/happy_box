@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <Servo.h>
+#include <VL53L0X.h>
 
 #ifndef mood_h_
 #define mood_h_
@@ -9,10 +9,10 @@
  */
 class Mood {
   public:
-    Servo* servo;
+    VL53L0X* distanceSensor;
 
-    Mood(Servo* servo) {
-      this->servo = servo;
+    Mood(VL53L0X* distanceSensor) {
+      this->distanceSensor = distanceSensor;
     }
 
     /**

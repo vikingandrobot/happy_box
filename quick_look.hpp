@@ -5,11 +5,14 @@
 #define quick_look_h
 
 class QuickLook : public Mood {
+  private:
+    short numberOfCycles;
+  
   public:
     QuickLook(
-      Servo* servo
-    ) : Mood(servo) {
-
+      VL53L0X* distanceSensor
+    ) : Mood(distanceSensor) {
+      numberOfCycles = 0;
     }
 
     bool interact();
